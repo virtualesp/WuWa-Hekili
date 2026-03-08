@@ -4,8 +4,8 @@
     "theme": "default",
     "window_opacity": 0.9,
     "heavy_hold_time": 0.5,
-    "window_x": 773,
-    "window_y": 957
+    "window_x": 745,
+    "window_y": 960
   },
   "controller": {
     "hardware_mapping": {
