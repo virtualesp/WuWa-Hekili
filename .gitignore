@@ -11,6 +11,8 @@ logs/
 WuWa_Hekili.spec
 dist/
 build/
+build.bat
+WuWa_Hekili_v1.0
 
 __pycache__/
 *.pyc

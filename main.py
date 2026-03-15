@@ -110,34 +110,45 @@ class HekiliApp:
 
         self.menu.hide()
 
-        # 启动定时器和监听
-        self.heartbeat_timer = QTimer()
-        self.heartbeat_timer.timeout.connect(self.on_timer_tick)
-        self.heartbeat_timer.start(50)
-
         self.input_thread = InputListener()
         self.input_thread.action_detected.connect(self.on_action_detected)
+
+        def on_device_switched(device_name):
+            # is_advance=False 意味着不播放滑动动画，只是原地更换角落里的按键图标
+            self.refresh_ui(is_advance=False)
+
+        self.input_thread.device_switched.connect(on_device_switched)
+
         self.input_thread.start()
 
         self.refresh_ui(is_advance=False)
         log.info("✅ 悬浮窗已就绪，按启动键(X)激活...")
 
     def on_action_detected(self, action_name, is_down):
+        # 无论是否激活，只要按下回退键，立刻执行回退并结束本次监听
+        if is_down and action_name == "rollback":
+            if self.director.rollback():
+                self.refresh_ui(is_advance=False)
+            return
+
+        # 如果脚本还没启动，我们只等发令枪
         if not self.is_active:
             if is_down and action_name == "start_trigger":
                 self.is_active = True
                 log.info("🚀 [System] 脚本正式激活！")
-                self.overlay.slot_current.setStyleSheet("ActionWidget { border: 4px solid #00FF00; }")
+
                 self.director.reset()
                 self.refresh_ui(is_advance=False)
+                if len(self.overlay.widgets) > 1:
+                    self.overlay.widgets[1].setStyleSheet(
+                        "ActionWidget { border: 4px solid #00FF00; background-color: rgba(0, 0, 0, 180); border-radius: 8px; }")
+            # 未激活时，所有其他按键全被这里的 return 拦截丢弃
             return
 
+        # 能走到这里的，一定是“已经激活了”，并且“不是回退键”的动作
         if self.director.input_received(action_name, is_down):
             self.refresh_ui(is_advance=True)
 
-    def on_timer_tick(self):
-        if self.is_active and self.director.check_auto_advance():
-            self.refresh_ui(is_advance=True)
 
     def on_config_reload(self):
         if self.input_thread and self.input_thread.isRunning():
@@ -151,6 +162,8 @@ class HekiliApp:
 
 
 if __name__ == "__main__":
+    if getattr(sys, 'frozen', False):
+        os.chdir(os.path.dirname(sys.executable))
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     controller = HekiliApp(app)

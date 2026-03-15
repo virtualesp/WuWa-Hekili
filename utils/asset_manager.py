@@ -1,11 +1,24 @@
 import os
+import sys
 from utils.config_manager import config
 
 
 class AssetManager:
     def __init__(self, asset_path):
-        self.path = asset_path
+        """
+        :param asset_path: 开发环境下传入的相对路径，如 "assets/assets"
+        """
+        if getattr(sys, 'frozen', False):
+            # 如果是打包后的环境：忽略传入参数，强制定位到 EXE 旁边的 _internal 目录
+            exe_root = os.path.dirname(sys.executable)
+            self.path = os.path.join(exe_root, "_internal", "assets", "assets")
+        else:
+            # 如果是开发环境：使用传入的路径，并转为绝对路径防止出错
+            self.path = os.path.abspath(asset_path)
+
+        # 逻辑：assets/assets 的上一级目录是 assets，ui 文件夹就在 assets 里面
         self.ui_path = os.path.join(os.path.dirname(self.path), "ui")
+
         self.weapon_map = {}
         self.load_mapping()
         self.folder_map = config.get("assets.folder_mapping", {})

@@ -4,31 +4,31 @@
     "theme": "default",
     "window_opacity": 0.9,
     "heavy_hold_time": 0.5,
-    "window_x": 1140,
-    "window_y": 653
+    "window_x": 694,
+    "window_y": 915
   },
   "controller": {
-    "hardware_mapping": {
-      "0": "xbox_button_color_a",
-      "1": "xbox_button_color_b",
-      "2": "xbox_button_color_x",
-      "3": "xbox_button_color_y",
-      "4": "xbox_lb",
-      "5": "xbox_rb",
-      "6": "xbox_button_view",
-      "7": "xbox_button_menu",
-      "8": "xbox_ls",
-      "9": "xbox_rs"
+    "buttons": {
+      "a": 0,
+      "b": 1,
+      "x": 2,
+      "y": 3,
+      "lb": 4,
+      "rb": 5,
+      "view": 6,
+      "menu": 7,
+      "ls": 8,
+      "rs": 9
     },
-    "axis_mapping": {
-      "4": "xbox_lt",
-      "5": "xbox_rt"
+    "axes": {
+      "lt": 4,
+      "rt": 5
     },
-    "hat_mapping": {
-      "0,1": "xbox_dpad_up",
-      "0,-1": "xbox_dpad_down",
-      "-1,0": "xbox_dpad_left",
-      "1,0": "xbox_dpad_right"
+    "hat_": {
+      "dpad_up": "0,1",
+      "dpad_down": "0,-1",
+      "dpad_left": "-1,0",
+      "dpad_right": "1,0"
     }
   },
   "assets": {
@@ -37,6 +37,7 @@
       "heavy": "heavy",
       "skill": "resonance_skill",
       "ult": "resonance_liberation",
+      "execution": "resonance_skill",
       "jump": "jump",
       "dodge": "dodge",
       "echo": "echo",
@@ -44,44 +45,46 @@
     },
     "default_filename": {
       "basic": "normal",
+      "heavy": "heavy",
       "skill": "normal",
       "ult": "liberation",
       "jump": "jump",
       "dodge": "dodge",
-      "intro": "character",
+      "execution": "normal",
+      "intro": "avatar",
       "echo": "echo"
     }
   },
   "keymaps": {
     "xbox": {
-      "start_trigger": "xbox_button_x",
-      "basic": "xbox_button_menu",
-      "skill": "xbox_dpad_left",
+      "start_trigger": "xbox_lb",
+      "rollback": "xbox_button_view",
+      "basic": "xbox_button_b",
+      "skill": "xbox_button_y",
       "ult": "xbox_rb",
       "jump": "xbox_button_a",
-      "dash": "xbox_rt",
       "dodge": "xbox_rt",
       "echo": "xbox_lt",
+      "execution": "xbox_button_x",
       "lock": "xbox_rs",
       "intro_1": "xbox_dpad_up",
       "intro_2": "xbox_dpad_right",
-      "intro_3": "xbox_dpad_down",
-      "execution": "xbox_button_a"
+      "intro_3": "xbox_dpad_down"
     },
     "keyboard": {
+      "start_trigger": "keyboard_x",
+      "rollback": "keyboard_v",
       "basic": "mouse_left",
       "skill": "keyboard_e",
       "ult": "keyboard_r",
       "jump": "keyboard_space",
-      "dash": "key_shift",
       "dodge": "mouse_right",
       "echo": "keyboard_q",
+      "execution": "keyboard_f",
+      "lock": "mouse_scroll",
       "intro_1": "keyboard_1",
       "intro_2": "keyboard_2",
-      "intro_3": "keyboard_3",
-      "start_trigger": "keyboard_x",
-      "lock": "mouse_scroll",
-      "execution": "keyboard_f"
+      "intro_3": "keyboard_3"
     }
   }
 }

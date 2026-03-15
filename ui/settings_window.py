@@ -76,6 +76,7 @@ class SettingsWindow(QWidget):
 
         actions = [
             ("🚀 启动/重置 (主发令键)", "start_trigger"),
+            ("⏪ 回退/上一步 (Rollback)", "rollback"),
             ("⚔️ 普通攻击 (Basic)", "basic"),
             ("✨ 共鸣技能 (Skill)", "skill"),
             ("💥 共鸣解放 (Ult)", "ult"),

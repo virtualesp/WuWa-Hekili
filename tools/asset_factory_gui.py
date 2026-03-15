@@ -9,10 +9,22 @@ from PySide6.QtCore import Qt, QTimer, Signal, QRect
 from PySide6.QtGui import QImage, QPixmap, QPainter, QPen, QColor
 
 # ---------------- 配置与常量 ----------------
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ASSETS_DIR = os.path.join(BASE_DIR, "assets", "assets")
-MAPPING_FILE = os.path.join(ASSETS_DIR, "Character_Occupation.txt")
-FACTORY_CONFIG = os.path.join(BASE_DIR, "tools", "factory_config.json")
+if getattr(sys, 'frozen', False):
+    # 打包后的环境：获取 .exe 所在目录
+    EXE_ROOT = os.path.dirname(sys.executable)
+    # 钻进 _internal 寻找资源
+    INTERNAL_ROOT = os.path.join(EXE_ROOT, "_internal")
+
+    ASSETS_DIR = os.path.join(INTERNAL_ROOT, "assets", "assets")
+    FACTORY_CONFIG = os.path.join(INTERNAL_ROOT, "tools", "factory_config.json")
+    # 如果 Character_Occupation.txt 也要读
+    MAPPING_FILE = os.path.join(ASSETS_DIR, "Character_Occupation.txt")
+else:
+    # 开发环境保持原样
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ASSETS_DIR = os.path.join(BASE_DIR, "assets", "assets")
+    MAPPING_FILE = os.path.join(ASSETS_DIR, "Character_Occupation.txt")
+    FACTORY_CONFIG = os.path.join(BASE_DIR, "tools", "factory_config.json")
 
 # 💡 升级：增加中文描述，并加入回路和协奏值
 # 格式: ("文件夹名", "文件前缀", "中文描述")
@@ -128,7 +140,7 @@ class VideoLabel(QLabel):
 class AssetFactory(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("WuWa Asset Factory v2.0 (支持状态条捕捉)")
+        self.setWindowTitle("WuWa Asset Factory")
         self.resize(1400, 800)
 
         self.cap = None

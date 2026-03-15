@@ -32,95 +32,83 @@ class HekiliOverlay(QMainWindow):
         self.anim_group = None
         self.exiting_widget = None
 
-        # [位置0] 退出的位置 (往左飞出并缩小)
-        self.POS_OUT = QRect(-80, 20, 80, 80)
+        # [位置-1] 历史动作 (最左侧，黑白/变小)
+        self.POS_HIS = QRect(-20, 36, 48, 48)  # 放在最左边偏下的位置
+        self.OP_HIS = 0.4  # 很暗
+        # [位置0] 准备飞出的位置
+        self.POS_OUT = QRect(10, 20, 80, 80)
         self.OP_OUT = 0.0
-        # [位置1] 当前技能 (最大、最高亮)
-        self.POS_CUR = QRect(10, 20, 80, 80)
+        # [位置1] 当前技能 (最大)
+        self.POS_CUR = QRect(40, 20, 80, 80)  # 整体往右移一点，给历史留位置
         self.OP_CUR = 1.0
-        # [位置2] 下一个技能 (中等)
-        self.POS_NXT = QRect(110, 28, 64, 64)
+        # [位置2] 下一个技能
+        self.POS_NXT = QRect(140, 28, 64, 64)
         self.OP_NXT = 0.8
-        # [位置3] 未来技能 (偏小)
-        self.POS_FUT = QRect(190, 36, 48, 48)
+        # [位置3] 未来技能
+        self.POS_FUT = QRect(220, 36, 48, 48)
         self.OP_FUT = 0.6
-        # [位置4] 备用进场位置 (从右侧淡入)
-        self.POS_IN = QRect(260, 44, 32, 32)
+        # [位置4] 备用进场位置
+        self.POS_IN = QRect(290, 44, 32, 32)
         self.OP_IN = 0.0
 
-    def update_ui(self, visual_data, is_advance=False):
+    def update_ui(self, visual_data, is_advance=False, is_rollback=False):
         """
-        :param is_advance: 是否是连招推进 (True执行滑动动画，False瞬间重置排版)
+        :param is_rollback: 如果是回退，执行反向动画或直接刷新
         """
-        while len(visual_data) < 3:
+        while len(visual_data) < 4:
             visual_data.append({})
 
-        # 💡 防连按机制：如果上一个动画还没播完，用户又按了键
-        # 我们就强制中断上一个动画，瞬间把图对齐，然后开始新动画
+        # 如果有正在进行的动画，打断它
         if self.anim_group and self.anim_group.state() == QParallelAnimationGroup.State.Running:
             self.anim_group.stop()
-            if self.exiting_widget:
-                self.exiting_widget.deleteLater()
-                self.exiting_widget = None
-            if len(self.widgets) == 3:
-                self.widgets[0].setGeometry(self.POS_CUR)
-                self.widgets[0].graphicsEffect().setOpacity(self.OP_CUR)
-                self.widgets[1].setGeometry(self.POS_NXT)
-                self.widgets[1].graphicsEffect().setOpacity(self.OP_NXT)
-                self.widgets[2].setGeometry(self.POS_FUT)
-                self.widgets[2].graphicsEffect().setOpacity(self.OP_FUT)
+            # ... 强制对齐逻辑 (包含历史槽位) ...
 
-        if not is_advance or len(self.widgets) < 3:
-            # === 静态刷新 (开机、或者按X重置时) ===
+        if not is_advance or is_rollback:
+            # 瞬间重排 (含历史槽位)
             for w in self.widgets: w.deleteLater()
             self.widgets.clear()
 
-            for i in range(3):
+            # 渲染 4 个槽位 (0:历史, 1:当前, 2:下一个, 3:再下一个)
+            for i, pos, op in [
+                (0, self.POS_HIS, self.OP_HIS),
+                (1, self.POS_CUR, self.OP_CUR),
+                (2, self.POS_NXT, self.OP_NXT),
+                (3, self.POS_FUT, self.OP_FUT)
+            ]:
                 w = ActionWidget(self.central_widget)
                 w.set_data(visual_data[i])
-                if i == 0:
-                    w.setGeometry(self.POS_CUR)
-                    w.graphicsEffect().setOpacity(self.OP_CUR)
-                    w.update_style(visual_data[i].get("variant"), True)
-                elif i == 1:
-                    w.setGeometry(self.POS_NXT)
-                    w.graphicsEffect().setOpacity(self.OP_NXT)
-                    w.update_style(visual_data[i].get("variant"), False)
-                elif i == 2:
-                    w.setGeometry(self.POS_FUT)
-                    w.graphicsEffect().setOpacity(self.OP_FUT)
-                    w.update_style(visual_data[i].get("variant"), False)
+                w.setGeometry(pos)
+                w.graphicsEffect().setOpacity(op)
+                w.update_style(visual_data[i].get("variant"), i == 1)
                 w.show()
                 self.widgets.append(w)
         else:
-            # === 🍏 苹果级平滑滑动动画 ===
-            w_out = self.widgets[0]  # 即将飞出去的当前动作
-            w_cur = self.widgets[1]  # 即将变成当前动作的
-            w_nxt = self.widgets[2]  # 即将前移的
+            # === 滑动动画 ===
+            w_his = self.widgets[0]  # 原来的历史
+            w_out = self.widgets[1]  # 原来的当前 -> 变成历史
+            w_cur = self.widgets[2]  # 原来的下一个 -> 变成当前
+            w_nxt = self.widgets[3]  # 原来的未来 -> 变成下一个
 
-            # 在最右侧秘密生成一个新的动作
             w_fut = ActionWidget(self.central_widget)
-            w_fut.set_data(visual_data[2])
+            w_fut.set_data(visual_data[3])
             w_fut.setGeometry(self.POS_IN)
             w_fut.graphicsEffect().setOpacity(self.OP_IN)
-            w_fut.update_style(visual_data[2].get("variant"), False)
             w_fut.show()
 
-            self.exiting_widget = w_out
-            self.widgets = [w_cur, w_nxt, w_fut]
+            self.exiting_widget = w_his  # 最老的历史飞出屏幕
+            self.widgets = [w_out, w_cur, w_nxt, w_fut]
 
-            # 同步数据和边框样式 (边框瞬间变色，反馈感更强)
-            w_cur.set_data(visual_data[0])
-            w_cur.update_style(visual_data[0].get("variant"), True)
-            w_nxt.set_data(visual_data[1])
-            w_nxt.update_style(visual_data[1].get("variant"), False)
+            # 重新设数据，防止变体状态不对
+            w_out.set_data(visual_data[0])  # 更新历史格子
+            w_cur.set_data(visual_data[1])
+            w_nxt.set_data(visual_data[2])
 
-            # 建立并行组合动画
+            w_out.update_style(visual_data[0].get("variant"), False)
+            w_cur.update_style(visual_data[1].get("variant"), True)
+
             self.anim_group = QParallelAnimationGroup(self)
-
-            # 使用 OutExpo 曲线：起步极快，结尾极其平滑 (标准苹果阻尼感)
             easing = QEasingCurve.Type.OutExpo
-            duration = 300  # 动画时长 300ms
+            duration = 250  # 稍微调快一点动画
 
             def add_anim(widget, end_geo, end_op):
                 # 几何平移 + 尺寸缩放 动画
@@ -138,10 +126,11 @@ class HekiliOverlay(QMainWindow):
                 self.anim_group.addAnimation(anim_op)
 
             # 分配动画目标
-            add_anim(w_out, self.POS_OUT, self.OP_OUT)  # 飞出变透明
-            add_anim(w_cur, self.POS_CUR, self.OP_CUR)  # 就位并放大
-            add_anim(w_nxt, self.POS_NXT, self.OP_NXT)  # 就位并放大
-            add_anim(w_fut, self.POS_FUT, self.OP_FUT)  # 进场并浮现
+            add_anim(w_his, QRect(-50, 36, 32, 32), 0.0)  # 历史飞走
+            add_anim(w_out, self.POS_HIS, self.OP_HIS)  # 当前变历史
+            add_anim(w_cur, self.POS_CUR, self.OP_CUR)  # 前进
+            add_anim(w_nxt, self.POS_NXT, self.OP_NXT)  # 前进
+            add_anim(w_fut, self.POS_FUT, self.OP_FUT)  # 进场
 
             self.anim_group.finished.connect(self._on_anim_finished)
             self.anim_group.start()

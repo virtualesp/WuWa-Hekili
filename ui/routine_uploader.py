@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QLineEdit, QTextEdit, QPushButton, QComboBox,
                                QStackedWidget, QFormLayout, QGroupBox, QMessageBox, QProgressBar, QInputDialog,
@@ -8,9 +9,7 @@ from PySide6.QtCore import Qt, Signal, QTimer
 from PySide6.QtGui import QPixmap
 
 from tools.generic_parser import GenericScriptParser
-from ui.widgets import ActionEditorRow
-from utils.config_manager import config
-from utils.asset_manager import AssetManager  # 💡 确保导入
+from utils.asset_manager import AssetManager
 from utils.logger import log
 
 
@@ -110,6 +109,10 @@ class RoutineUploaderWindow(QWidget):
         self.stacked_widget.addWidget(self.preview_page)
 
     def _scan_characters(self):
+        if getattr(sys, 'frozen', False):
+            root_dir = os.path.dirname(sys.executable)
+        else:
+            root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         assets_path = os.path.join(base_dir, "assets", "assets")
         if not os.path.exists(assets_path): return ["Unknown"]

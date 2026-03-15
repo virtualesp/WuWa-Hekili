@@ -74,27 +74,27 @@ class ConfigManager:
                 "window_y": 100
             },
             "controller": {
-                "hardware_mapping": {
-                    "0": "xbox_button_color_a",
-                    "1": "xbox_button_color_b",
-                    "2": "xbox_button_color_x",
-                    "3": "xbox_button_color_y",
-                    "4": "xbox_lb",
-                    "5": "xbox_rb",
-                    "6": "xbox_button_view",
-                    "7": "xbox_button_menu",
-                    "8": "xbox_ls",
-                    "9": "xbox_rs"
+               "buttons": {
+                   "a" : 0,
+                   "b" : 1,
+                   "x" : 2,
+                   "y" : 3,
+                   "lb": 4,
+                   "rb": 5,
+                   "view": 6,
+                   "menu": 7,
+                   "ls": 8,
+                   "rs": 9
+               },
+                "axes": {
+                    "lt": 4,
+                    "rt": 5
                 },
-                "axis_mapping": {
-                    "4": "xbox_lt",
-                    "5": "xbox_rt"
-                },
-                "hat_mapping": {
-                    "0,1": "xbox_dpad_up",
-                    "0,-1": "xbox_dpad_down",
-                    "-1,0": "xbox_dpad_left",
-                    "1,0": "xbox_dpad_right"
+                "hat_": {
+                    "dpad_up": "0,1",
+                    "dpad_down": "0,-1",
+                    "dpad_left": "-1,0",
+                    "dpad_right": "1,0"
                 }
             },
             "assets": {
@@ -123,21 +123,23 @@ class ConfigManager:
             },
             "keymaps": {
                 "xbox": {
-                    "start_trigger": "xbox_button_color_x",
-                    "basic": "xbox_button_color_b",
-                    "skill": "xbox_button_color_y",
+                    "start_trigger": "xbox_lb",
+                    "rollback": "xbox_button_view",
+                    "basic": "xbox_button_b",
+                    "skill": "xbox_button_y",
                     "ult": "xbox_rb",
-                    "jump": "xbox_button_color_a",
+                    "jump": "xbox_button_a",
                     "dodge": "xbox_rt",
                     "echo": "xbox_lt",
-                    "execution": "xbox_button_color_y",
+                    "execution": "xbox_button_x",
                     "lock": "xbox_rs",
                     "intro_1": "xbox_dpad_up",
                     "intro_2": "xbox_dpad_right",
                     "intro_3": "xbox_dpad_down"
                 },
                 "keyboard": {
-                    "start_trigger": "keyboard_f",
+                    "start_trigger": "keyboard_x",
+                    "rollback": "keyboard_v",
                     "basic": "mouse_left",
                     "skill": "keyboard_e",
                     "ult": "keyboard_r",
